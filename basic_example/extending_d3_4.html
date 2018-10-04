@@ -1,0 +1,210 @@
+<!doctype html>
+<html>
+	<head>
+		<meta charset="utf-8">
+
+		<title>Basic Example</title>
+
+		<style type="text/css">
+			h1 {
+			    color: #ffffff;
+			    font-family:  'Raleway';
+			    font-weight: normal;
+			        font-size: 1.75em;
+			    letter-spacing: .2em;
+			    line-height: 1.1em;
+			    margin:0px;
+			    text-align: center;
+			    text-transform: uppercase;
+			}
+			#container {
+			    width:810px;
+			    height:	600px;
+			}
+			#header {
+			    width:800px;
+			    height: 50px;
+			    padding: 5px;
+			    background: #0185AC;
+			}
+			#sidebar {
+			    height:400px;
+			    width:150px;
+			    background: #0185AC;
+			    float:left;
+			    font-size: 11px;
+			    padding: 5px;
+			}
+			#content {
+			    background-color:#ffffff;
+			    height:400px;
+			    width:650px;
+			    float:left;
+			}
+			#footer {
+			    width:810px;
+			    height: 50px;
+			    background: #0185AC;
+			    float:left;
+			    padding: 5px;
+			    font-size: 11px;
+    			text-align: right;
+			}
+			circle {
+				stroke: #0185AC;
+				stroke-width: 2;
+				fill: white;
+			}
+
+			 .d3-tip {
+			     line-height: 1;
+			     padding: 1px;
+			     background: transparent;
+			     color: #000;
+			     border-radius: 2px;
+ 			}
+
+ 			.axis path, .axis line {
+			    fill: none;
+			    stroke: grey;
+			    shape-rendering: crispEdges;
+			}
+			.axis text {
+			    font-size: 11px;
+			 }
+
+			 select, button {
+			 	margin: 5px;
+			 	font-size: 20px;
+			 }
+			 
+		</style>
+
+		<script type="text/javascript" src="https://d3js.org/d3.v3.min.js"></script>
+		<script type="text/javascript" src="http://labratrevenge.com/d3-tip/javascripts/d3.tip.v0.6.3.js"></script>
+
+	</head>
+
+	<body>
+		<div id ="container">
+    		<div id ="header">
+       			<h1>Demo Scatterplot</h1>
+    		</div>
+    		<div id ="sidebar">
+
+    			X-axis:
+	    		<select id="xAxisVar" onchange="reDraw()">
+	    			<option value="x" selected="selected">x</option>
+    				<option value="y">y</option>
+	    		</select>
+
+
+
+    		</div>
+    		<div id ="content">
+    			<svg height="400" width="650">
+
+        		</svg>
+    		</div>
+    		<div id ="footer">
+    			Y-axis:
+    			<select id="yAxisVar" onchange="reDraw()">
+    				<option value="x">x</option>
+    				<option value="y" selected="selected">y</option>
+    			</select>
+    		</div>
+		</div>
+	</body>
+
+		<script type="text/javascript">
+			var circle_data = [{"x": 100,
+			                "y": 100,
+			                "r": 10,
+			            	"cluster": 1,
+			            	"name": "Point 1"},
+			               {"x": 200,
+			                "y": 250,
+			                "r": 10,
+			            	"cluster": 2,
+			            	"name": "Point 2"},
+			               {"x": 300,
+			                "y": 180,
+			                "r": 10,
+			            	"cluster": 2,
+			            	"name": "Point 3"}];
+
+
+			var w = 420,
+				h = 400,
+				padding = 30;
+
+			var xScale = d3.scale.linear()
+				// ensure axes are always big enough irrespective of the selection 
+				.domain([0, d3.max(circle_data, function(d) { 
+					return d3.max([d.x, d.y]);
+				})])
+				.range([padding, w - padding]);
+
+			var yScale = d3.scale.linear()
+				.domain([0, d3.max(circle_data, function(d) { 
+					return d3.max([d.x, d.y]);
+				})])
+				.range([h - padding, padding]);
+
+			var svg = d3.select("svg");
+
+			var tip = d3.tip()
+				.attr('class', 'd3-tip')
+				.offset([-10, 0])
+				.html(function(d) { return d.name; });
+			svg.call(tip);
+
+			var diag_circles = svg.selectAll("circle");
+
+			diag_circles.data(circle_data)
+				.enter()
+				.append("circle")
+				.attr("cx", function(d) { return xScale(d.x) })
+				.attr("cy", function(d) { return yScale(d.y) })
+				.attr("r", function(d) { return d.r })
+				.style("stroke", function(d) {if (d.cluster === 1) {return "#92B6D4";} else {return "gray";}})
+				.on('mouseover', tip.show)
+				.on('mouseout', tip.hide);
+
+			var xAxis = d3.svg.axis()
+				.scale(xScale)
+				.orient('bottom');
+			var yAxis = d3.svg.axis()
+				.scale(yScale)
+				.orient('left');
+			svg.append('g')
+				.attr('class', 'axis')
+				.attr('transform', 'translate(0,' + (h - padding) + ')')
+				.call(xAxis);
+			svg.append('g')
+				.attr('class', 'axis')
+				.attr('transform', 'translate(' + padding + ', 0)')
+				.call(yAxis);
+
+
+			// grab the values from the drop downs and update x and y values of the circles
+			// transition function to make smooth animation. duration in milliseconds
+
+			function reDraw() {
+				xVar = document.getElementById('xAxisVar').value;
+				yVar = document.getElementById('yAxisVar').value;
+
+				d3.selectAll('circle')
+					.transition()
+					.duration(1000)
+					.attr('cx', function(d) {return eval('xScale(d.' + xVar + ');'); })
+					.attr('cy', function(d) {return eval('yScale(d.' + yVar + ');'); })
+
+			}
+
+		</script>
+	
+
+
+
+	
